@@ -1,61 +1,122 @@
 <html lang="en">
-    <head>
-        <title>Web Push Notification</title>
 
-    </head>
-    <body>
-        <h1>Web Push Notification!</h1>
-        <button id="my-button">Say hay!</button>
-    </body>
-    <script src="notify.js"></script>
-    <script>
-        document.getElementById('my-button').addEventListener('click', function () {
+<head>
+    <title>Web Push Notification</title>
 
-        function onShowNotification () {
-            console.log('notification is shown!');
-        }
+</head>
 
-        function onCloseNotification () {
-            console.log('notification is closed!');
-        }
+<body>
+    <h1>Web Push Notification!</h1>
+    <button id="my-button">Registrate a worker.</button>
+</body>
+<script src="notify.js"></script>
+<!-- <script id="worker1" type="javascript/worker">
+            addEventListener('message', function (e) {
+           
+                    setTimeout(() => {
+                        var myNotification = new Notify('Yo dawg!', {
+                            body: 'This is an awesome notification',
+                            tag: 'Say hay!',
+                            notifyShow: onShowNotification,
+                            notifyClose: onCloseNotification,
+                            notifyClick: onClickNotification,
+                            notifyError: onErrorNotification,
+                            timeout: 4
+                        });
+            
+                        myNotification.show();
+           
+            }
+    }, false) -->
+</script>
 
-        function onClickNotification () {
-            console.log('notification was clicked!');
-        }
+<script>
 
-        function onErrorNotification () {
-            console.error('Error showing notification. You may need to request permission.');
-        }
+    function registerWorker() {
+        return navigator.serviceWorker.register('worker.js').then(function (registration) {
+            console.log("Service worker successfully registerd.")
+            return registration;
+        })
+        .catch(function (err) {
+            console.error('Unable to registrate service worker.', err);
+        });
+    }
 
-        function onPermissionGranted () {
-            console.log('Permission has been granted by the user');
-            doNotification();
-        }
+    // Check does browse support push messaging
+    if(('serviceWorker' in navigator) && ('PushManager' in window)){
+        registerWorker();
+    }
+        
 
-        function onPermissionDenied () {
-            console.warn('Permission has been denied by the user');
-        }
+    // var worker = new Worker("worker.js");
+    // worker.postMessage();
 
-        function doNotification () {
-            var myNotification = new Notify('Yo dawg!', {
-                body: 'This is an awesome notification',
-                tag: 'Say hay!',
-                notifyShow: onShowNotification,
-                notifyClose: onCloseNotification,
-                notifyClick: onClickNotification,
-                notifyError: onErrorNotification,
-                timeout: 4
-            });
+    // var blob = new Blob([document.querySelector('#worker1').textContent]);
+    // var worker = new Worker(window.URL.createObjectURL(blob));
+    // worker.postMessage({}); // Start the worker.
 
-            myNotification.show();
-        }
+    document.getElementById('my-button').addEventListener('click', function () {
+        
+        // var option = {
+        //     "body": "Did you make a $1,000,000 purchase at Dr. Evil...",
+        //     "icon": "images/ccard.png",
+        //     "vibrate": [200, 100, 200, 100, 200, 100, 400],
+        //     "tag": "request",
+        //     "actions": [
+        //         { "action": "yes", "title": "Yes", "icon": "images/yes.png" },
+        //         { "action": "no", "title": "No", "icon": "images/no.png" }
+        //     ]
+        // }
+        // var title = "Titel";
 
-        if (!Notify.needsPermission) {
-            doNotification();
-        } else if (Notify.isSupported()) {
-            Notify.requestPermission(onPermissionGranted, onPermissionDenied);
-        }
+        // serviceWorkerRegistration.showNotification(title, options);
+
+        // function onShowNotification () {
+        //     console.log('notification is shown!');
+        // }
+
+        // function onCloseNotification () {
+        //     console.log('notification is closed!');
+        // }
+
+        // function onClickNotification () {
+        //     console.log('notification was clicked!');
+        // }
+
+        // function onErrorNotification () {
+        //     console.error('Error showing notification. You may need to request permission.');
+        // }
+
+        // function onPermissionGranted () {
+        //     console.log('Permission has been granted by the user');
+        //     doNotification();
+        // }
+
+        // function onPermissionDenied () {
+        //     console.warn('Permission has been denied by the user');
+        // }
+
+        // function doNotification () {
+        //     var myNotification = new Notify('Yo dawg!', {
+        //         body: 'This is an awesome notification',
+        //         tag: 'Say hay!',
+        //         notifyShow: onShowNotification,
+        //         notifyClose: onCloseNotification,
+        //         notifyClick: onClickNotification,
+        //         notifyError: onErrorNotification,
+        //         timeout: 4
+        //     });
+
+        //     myNotification.show();
+        // }
+
+        // if (!Notify.needsPermission) {
+        //     doNotification();
+        // } else if (Notify.isSupported()) {
+        //     Notify.requestPermission(onPermissionGranted, onPermissionDenied);
+        // }
 
     }, false);
-    </script>
+</script>
+
 </html>
