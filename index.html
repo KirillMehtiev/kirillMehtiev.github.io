@@ -32,21 +32,26 @@
 
 <script>
 
-    function registerWorker() {
-        return navigator.serviceWorker.register('worker.js').then(function (registration) {
-            console.log("Service worker successfully registerd.")
-            return registration;
-        })
-        .catch(function (err) {
-            console.error('Unable to registrate service worker.', err);
-        });
-    }
+    // function registerWorker() {
+    //     return navigator.serviceWorker.register('worker.js').then(function (registration) {
+    //         console.log("Service worker successfully registerd.")
+    //         return registration;
+    //     })
+    //         .catch(function (err) {
+    //             console.error('Unable to registrate service worker.', err);
+    //         });
+    // }
+
+
 
     // Check does browse support push messaging
-    if(('serviceWorker' in navigator) && ('PushManager' in window)){
-        registerWorker();
-    }
-        
+    // if (('serviceWorker' in navigator) && ('PushManager' in window)) {
+    //     setTimeout(() => {
+    //         askPermission();
+    //     }, 4000);
+    //     // registerWorker();
+    // }
+
 
     // var worker = new Worker("worker.js");
     // worker.postMessage();
@@ -56,7 +61,45 @@
     // worker.postMessage({}); // Start the worker.
 
     document.getElementById('my-button').addEventListener('click', function () {
-        
+
+
+        function askPermission() {
+            return new Promise(function (resolve, reject) {
+                const permissionResult = Notification.requestPermission(function (result) {
+                    resolve(result);
+                });
+
+                if (permissionResult) {
+                    permissionResult.then(resolve, reject);
+                }
+            })
+                .then(function (permissionResult) {
+                    if (permissionResult !== 'granted') {
+                        throw new Error('We weren\'t granted permission.');
+                    }
+
+                    subscribeUserToPush();
+                })
+        }
+
+        function subscribeUserToPush() {
+            return navigator.serviceWorker.register('worker.js')
+                .then(function (registration) {
+                    const subscribeOptions = {
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(
+                            'BIfdaZ5g4-f808vuP1hHhBxcBItWYs49Yx_UFPxScTXJ2fLesE8kPpLxlgeG11ldOhLmjN-TgMt7qhizjK3sChQ'
+                        )
+                    };
+
+                    return registration.pushManager.subscribe(subscribeOptions);
+                })
+                .then(function (pushSubscription) {
+                    console.log('Received PushSubscription: ', JSON.stringify(pushSubscription));
+                    return pushSubscription;
+                });
+        }
+
         // var option = {
         //     "body": "Did you make a $1,000,000 purchase at Dr. Evil...",
         //     "icon": "images/ccard.png",
