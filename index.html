@@ -60,10 +60,7 @@
     // var worker = new Worker(window.URL.createObjectURL(blob));
     // worker.postMessage({}); // Start the worker.
 
-    document.getElementById('my-button').addEventListener('click', function () {
-
-
-        function askPermission() {
+    function askPermission() {
             return new Promise(function (resolve, reject) {
                 const permissionResult = Notification.requestPermission(function (result) {
                     resolve(result);
@@ -99,6 +96,11 @@
                     return pushSubscription;
                 });
         }
+
+    document.getElementById('my-button').addEventListener('click', function () {
+
+        askPermission();
+        
 
         // var option = {
         //     "body": "Did you make a $1,000,000 purchase at Dr. Evil...",
