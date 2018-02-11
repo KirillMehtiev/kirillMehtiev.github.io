@@ -61,46 +61,61 @@
     // worker.postMessage({}); // Start the worker.
 
     function askPermission() {
-            return new Promise(function (resolve, reject) {
-                const permissionResult = Notification.requestPermission(function (result) {
-                    resolve(result);
-                });
+        return new Promise(function (resolve, reject) {
+            const permissionResult = Notification.requestPermission(function (result) {
+                resolve(result);
+            });
 
-                if (permissionResult) {
-                    permissionResult.then(resolve, reject);
+            if (permissionResult) {
+                permissionResult.then(resolve, reject);
+            }
+        })
+            .then(function (permissionResult) {
+                if (permissionResult !== 'granted') {
+                    throw new Error('We weren\'t granted permission.');
                 }
+
+                subscribeUserToPush();
             })
-                .then(function (permissionResult) {
-                    if (permissionResult !== 'granted') {
-                        throw new Error('We weren\'t granted permission.');
-                    }
+    }
 
-                    subscribeUserToPush();
-                })
+    function subscribeUserToPush() {
+        return navigator.serviceWorker.register('worker.js')
+            .then(function (registration) {
+                const subscribeOptions = {
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(
+                        'BIfdaZ5g4-f808vuP1hHhBxcBItWYs49Yx_UFPxScTXJ2fLesE8kPpLxlgeG11ldOhLmjN-TgMt7qhizjK3sChQ'
+                    )
+                };
+
+                return registration.pushManager.subscribe(subscribeOptions);
+            })
+            .then(function (pushSubscription) {
+                console.log('Received PushSubscription: ', JSON.stringify(pushSubscription));
+                return pushSubscription;
+            });
+    }
+
+    function urlB64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/\-/g, '+')
+            .replace(/_/g, '/');
+
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
         }
-
-        function subscribeUserToPush() {
-            return navigator.serviceWorker.register('worker.js')
-                .then(function (registration) {
-                    const subscribeOptions = {
-                        userVisibleOnly: true,
-                        applicationServerKey: urlBase64ToUint8Array(
-                            'BIfdaZ5g4-f808vuP1hHhBxcBItWYs49Yx_UFPxScTXJ2fLesE8kPpLxlgeG11ldOhLmjN-TgMt7qhizjK3sChQ'
-                        )
-                    };
-
-                    return registration.pushManager.subscribe(subscribeOptions);
-                })
-                .then(function (pushSubscription) {
-                    console.log('Received PushSubscription: ', JSON.stringify(pushSubscription));
-                    return pushSubscription;
-                });
-        }
+        return outputArray;
+    }
 
     document.getElementById('my-button').addEventListener('click', function () {
 
         askPermission();
-        
+
 
         // var option = {
         //     "body": "Did you make a $1,000,000 purchase at Dr. Evil...",
